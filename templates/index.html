@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload CSV - Fraud Detection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #e9f2fb;
+    }
+
+    .header-bar {
+      background-color: #bfc6cd;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-bar h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #343a40;
+      margin: 0;
+    }
+
+    .table-sm-custom {
+      font-size: 0.75rem;
+    }
+
+    .table-sm-custom td,
+    .table-sm-custom th {
+      padding: 0.25rem 0.4rem;
+    }
+
+    .btn-outline-danger {
+      border-color: #dc3545;
+      color: #dc3545;
+    }
+
+    .btn-outline-danger:hover {
+      background-color: #dc3545;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4 position-relative">
+
+    <!-- Logout Button -->
+    {% if session.get('logged_in') %}
+      <div class="d-flex justify-content-end mb-2">
+        <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+      </div>
+    {% endif %}
+
+    <!-- Page Header -->
+    <div class="header-bar text-center">
+      <h2>📤 Upload CSV for Fraud Detection</h2>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+          {{ messages[0] }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if message %}
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endif %}
+
+    <!-- Upload Form -->
+    <form method="POST" enctype="multipart/form-data" action="{{ url_for('index') }}">
+      <div class="mb-3">
+        <input class="form-control" type="file" name="file" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Upload</button>
+      <a href="{{ url_for('home') }}" class="btn btn-secondary ms-2">Go to Dashboard</a>
+      <a href="{{ url_for('view_data') }}" class="btn btn-outline-dark ms-2">View Uploaded Data (No Prediction)</a>
+    </form>
+
+    <!-- Table Display -->
+    {% if table %}
+      <div class="table-responsive mt-4" style="max-height: 600px; overflow-y: auto;">
+        {{ table | safe }}
+      </div>
+
+      <!-- Download Button -->
+      {% if download_link %}
+        <a href="{{ url_for('download', filename=download_link) }}" class="btn btn-success mt-3">Download Results</a>
+      {% endif %}
+
+      <!-- Pagination -->
+      {% set start_page = [1, page - 5]|max %}
+      {% set end_page = [total_pages, page + 5]|min %}
+      <nav class="mt-4 d-flex justify-content-center" aria-label="Page navigation">
+        <ul class="pagination flex-wrap">
+          {% if page > 1 %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for(pagination_endpoint, page=page-1) }}">&laquo;</a>
+            </li>
+          {% endif %}
+          {% for p in range(start_page, end_page + 1) %}
+            <li class="page-item {% if p == page %}active{% endif %}">
+              <a class="page-link" href="{{ url_for(pagination_endpoint, page=p) }}">{{ p }}</a>
+            </li>
+          {% endfor %}
+          {% if page < total_pages %}
+            <li class="page-item">
+              <a class="page-link" href="{{ url_for(pagination_endpoint, page=page+1) }}">&raquo;</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
